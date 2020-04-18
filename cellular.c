@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 typedef struct params
 {
@@ -36,17 +37,48 @@ typedef struct params
   char RULE;
   unsigned int NUM_CELLS;
   unsigned int CYCLES;
+  unsigned int arg_pos_start;
+  unsigned int arg_pos_end;
 } Params;
 
-void init(char *cells, Params *params)
+
+void init(char *cells, Params *params, char **argv)
 {
   unsigned int len = params->NUM_CELLS;
-  memset(cells, params->DEAD, len);
+  memset(cells, params->DEAD, len+1);
   cells[len+1] = '\0';
-  cells[(int)(len/2)] = params->ALIVE;
-  //DEBUG
-  cells[0] = params->ALIVE;
-  cells[len] = params->ALIVE;
+  
+  if(params->arg_pos_start == 0 || params->arg_pos_end == 0)
+  {
+    // no position given
+    // default
+    cells[(int)(len/2)] = params->ALIVE;
+    return;
+  }
+
+  char *arg;
+  int i;
+  for(i=params->arg_pos_start; i<=params->arg_pos_end; i++)
+  {
+    arg = argv[i];
+    if(isdigit(arg[0]))
+    {
+      cells[atoi(arg)] = params->ALIVE;
+    }
+    else if(isalpha(arg[0]))
+    {
+      switch(arg[0])
+      {
+        case 'm':
+          cells[(int)(len/2)] = params->ALIVE;
+          break;
+        case 'l':
+          cells[len] = params->ALIVE;
+          break;
+      }
+    }
+  }
+  
 }
 
 void update(char *cells, char *old_cells, Params *params)
@@ -102,27 +134,30 @@ void printHelp()
          "-t\tthe number of computed rows (time)\n" \
          "-l\tthe character which represents the living cells\n" \
          "-d\tthe character which represents the dead cells\n" \
-/*         "-s\tthe starting configuration of the first line of cells\n" \*/
-/*         "\tTo choose individual living cells, pass a list of white space\n" \*/
-/*         "\tseparated integers.\n" \*/
-/*         "\t  cellular -s 3 12 42 ...\n" \*/
-/*         "\tYou can choose the middle cell with 'm' and the last cell with 'l'.\n" \*/
-/*         "\t  cellular -s 0 m l\n" \*/
+         "-s\tthe starting configuration of the first line of cells\n" \
+         "\tTo choose individual living cells, pass a list of white space\n" \
+         "\tseparated integers.\n" \
+         "\t  cellular -s 3 12 42 ...\n" \
+         "\tYou can choose the middle cell with 'm' and the last cell with 'l'.\n" \
+         "\t  cellular -s 0 m l\n" \
 /*         "\tTo choose a random distribution, use 'r' and the probability in percent.\n" \*/
 /*         "\t  cellular -s r 50\n"*/
          );
 }
+
 
 void getArgs(int argc, char **argv, Params *params)
 {
   if(argc <= 1)
     return;
   
+  int n = 0;
   int i = 1;
   while(i < argc)
   {
     if(argv[i][0] == '-')
     {
+      // TODO: check, if next argument exists and is valid
       switch(argv[i][1])
       {
         case 'r':
@@ -144,6 +179,14 @@ void getArgs(int argc, char **argv, Params *params)
         case 'd':
           params->DEAD = argv[i+1][0];
           i += 2;
+          break;
+        case 's':
+          n = i+1;
+          while(n < argc && argv[n][0] != '-')
+            n++;
+          params->arg_pos_start = i+1;
+          params->arg_pos_end = n-1;
+          i += n-1;
           break;
         case 'h':
         default:
@@ -175,12 +218,14 @@ int main(int argc, char **argv)
   params.RULE = 30;
   params.NUM_CELLS = 80;
   params.CYCLES = 20;
+  params.arg_pos_start = 0;
+  params.arg_pos_end = 0;
   
   getArgs(argc, argv, &params);
   
   char cells[params.NUM_CELLS+1];
   
-  init(cells, &params); // TODO: auch mit random
+  init(cells, &params, argv); // TODO: auch mit random
   
   char *old_cells = cpCells(cells, params.NUM_CELLS+1);
   
