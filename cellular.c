@@ -70,8 +70,25 @@ void update(char *cells, char *old_cells, Params *params)
 
 void printHelp()
 {
-  printf("usage: cellular [-h] [-r <rule>] [-w <number of cells>]\n" \
-         "                [-c <number of life cycles>]\n");
+  printf("usage: cellular [-h] [-r <rule>] [-c <number of cells>]\n" \
+         "                [-t <number of life cycles>] [-l <alive char>]\n" \
+         "                [-d <dead char>] [-s <start configuration>]\n\n" \
+         
+         "-h\tshow this message\n" \
+         "-r\tthe rule of the cellular automaton\n" \
+         "-c\tthe number of cells in the row\n" \
+         "-t\tthe number of computed rows (time)\n" \
+         "-l\tthe character which represents the living cells\n" \
+         "-d\tthe character which represents the dead cells\n" \
+/*         "-s\tthe starting configuration of the first line of cells\n" \*/
+/*         "\tTo choose individual living cells, pass a list of white space\n" \*/
+/*         "\tseparated integers.\n" \*/
+/*         "\t  cellular -s 3 12 42 ...\n" \*/
+/*         "\tYou can choose the middle cell with 'm' and the last cell with 'l'.\n" \*/
+/*         "\t  cellular -s 0 m l\n" \*/
+/*         "\tTo choose a random distribution, use 'r' and the probability in percent.\n" \*/
+/*         "\t  cellular -s r 50\n"*/
+         );
 }
 
 void getArgs(int argc, char **argv, Params *params)
@@ -90,12 +107,20 @@ void getArgs(int argc, char **argv, Params *params)
           params->RULE = atoi(argv[i+1]);
           i += 2;
           break;
-        case 'w':
+        case 'c':
           params->NUM_CELLS = atoi(argv[i+1]);
           i += 2;
           break;
-        case 'c':
+        case 't':
           params->CYCLES = atoi(argv[i+1]);
+          i += 2;
+          break;
+        case 'l':
+          params->ALIVE = argv[i+1][0];
+          i += 2;
+          break;
+        case 'd':
+          params->DEAD = argv[i+1][0];
           i += 2;
           break;
         case 'h':
