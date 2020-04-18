@@ -1,24 +1,35 @@
+// cellular.c
+// a 1D cellular automaton
+//
+// Manuel Planton
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define NUM_CELLS 80
-#define CYCLES 80
-#define ALIVE '*'
-#define DEAD ' '
-
-void init(char *cells, unsigned int len)
+typedef struct params
 {
-  memset(cells, DEAD, len);
+  char ALIVE;
+  char DEAD;
+  char RULE;
+  unsigned int NUM_CELLS;
+  unsigned int CYCLES;
+} Params;
+
+void init(char *cells, Params *params)
+{
+  unsigned int len = params->NUM_CELLS;
+  memset(cells, params->DEAD, len);
   cells[len+1] = '\0';
-  cells[(int)(len/2)] = ALIVE;
+  cells[(int)(len/2)] = params->ALIVE;
   //DEBUG
-  cells[0] = ALIVE;
-  cells[len] = ALIVE;
+  cells[0] = params->ALIVE;
+  cells[len] = params->ALIVE;
 }
 
-void update(char *cells, unsigned int len, char rule)
+void update(char *cells, Params *params)
 {
+  unsigned int len = params->NUM_CELLS;
   char *old_cells = (char*) malloc((len+1)*sizeof(char));
   if(old_cells == NULL)
   {
@@ -45,7 +56,7 @@ void update(char *cells, unsigned int len, char rule)
         c = old_cells[i+j];
 
       // check symbol
-      if(c == ALIVE)
+      if(c == params->ALIVE)
         state = 1;
       else
         state = 0;
@@ -54,30 +65,76 @@ void update(char *cells, unsigned int len, char rule)
     }
     
     // apply rule
-    state = (rule & (1 << pattern)) != 0;
+    state = (params->RULE & (1 << pattern)) != 0;
 
     if(state == 1)
-      cells[i] = ALIVE;
+      cells[i] = params->ALIVE;
     else
-      cells[i] = DEAD;
+      cells[i] = params->DEAD;
   }
-  
   free(old_cells);
 }
 
-int main()
+void printHelp()
 {
-  char rule = 30;
+  printf("usage: cellular [-h] [-r <rule>] [-w <number of cells>]\n" \
+         "                [-c <number of life cycles>]\n");
+}
+
+void getArgs(int argc, char **argv, Params *params)
+{
+  if(argc <= 1)
+    return;
   
-  char cells[NUM_CELLS+1];
+  int i = 1;
+  while(i < argc)
+  {
+    if(argv[i][0] == '-')
+    {
+      switch(argv[i][1])
+      {
+        case 'r':
+          params->RULE = atoi(argv[i+1]);
+          i += 2;
+          break;
+        case 'w':
+          params->NUM_CELLS = atoi(argv[i+1]);
+          i += 2;
+          break;
+        case 'c':
+          params->CYCLES = atoi(argv[i+1]);
+          i += 2;
+          break;
+        case 'h':
+        default:
+          printHelp();
+          exit(EXIT_SUCCESS);
+      }
+    }
+  }
+}
+
+int main(int argc, char **argv)
+{
+  Params params;
+  // default values
+  params.ALIVE = '*';
+  params.DEAD = ' ';
+  params.RULE = 30;
+  params.NUM_CELLS = 80;
+  params.CYCLES = 20;
   
-  init(cells, NUM_CELLS); // TODO: auch mit random
+  getArgs(argc, argv, &params);
+  
+  char cells[params.NUM_CELLS+1];
+  
+  init(cells, &params); // TODO: auch mit random
   
   unsigned int cycle;
-  for(cycle=0; cycle < CYCLES; cycle++)
+  for(cycle=0; cycle < params.CYCLES; cycle++)
   {
     puts(cells);
-    update(cells, NUM_CELLS, rule);
+    update(cells, &params);
   }
   
   return 0;
