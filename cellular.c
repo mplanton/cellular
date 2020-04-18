@@ -193,7 +193,6 @@ void getArgs(int argc, char **argv, Params *params)
         exit(EXIT_FAILURE);
       }
         
-      
       // TODO: add choosing if wrap on sides
       switch(argv[i][1])
       {
@@ -232,7 +231,7 @@ void getArgs(int argc, char **argv, Params *params)
             n++;
           params->arg_pos_start = i+1;
           params->arg_pos_end = n-1;
-          i += n-1;
+          i = n;
           break;
         default:
           printHelp(params);
@@ -269,9 +268,9 @@ int main(int argc, char **argv)
   params.CYCLES = 20;
   params.arg_pos_start = 0;
   params.arg_pos_end = 0;
-  
+    
   getArgs(argc, argv, &params);
-  
+
   char cells[params.NUM_CELLS+1];
   
   init(cells, &params, argv);
