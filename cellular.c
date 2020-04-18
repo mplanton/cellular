@@ -42,6 +42,7 @@ typedef struct params
   unsigned int arg_pos_end;
 } Params;
 
+//------------------------------------------------------------------------------
 
 void setRand(char *cells, int prob, Params *params)
 {
@@ -57,6 +58,8 @@ void setRand(char *cells, int prob, Params *params)
     }
   }
 }
+
+//------------------------------------------------------------------------------
 
 void init(char *cells, Params *params, char **argv)
 {
@@ -101,6 +104,8 @@ void init(char *cells, Params *params, char **argv)
   
 }
 
+//------------------------------------------------------------------------------
+
 void update(char *cells, char *old_cells, Params *params)
 {
   unsigned int len = params->NUM_CELLS;
@@ -142,6 +147,8 @@ void update(char *cells, char *old_cells, Params *params)
   }
 }
 
+//------------------------------------------------------------------------------
+
 void printHelp(Params *params)
 {
   printf("usage: cellular [-h] [-r <rule>] [-c <number of cells>]\n" \
@@ -165,6 +172,7 @@ void printHelp(Params *params)
          , params->RULE, params->NUM_CELLS, params->CYCLES);
 }
 
+//------------------------------------------------------------------------------
 
 void getArgs(int argc, char **argv, Params *params)
 {
@@ -186,7 +194,6 @@ void getArgs(int argc, char **argv, Params *params)
       }
         
       
-      // TODO: check validity of parameters
       // TODO: add choosing if wrap on sides
       switch(argv[i][1])
       {
@@ -235,6 +242,8 @@ void getArgs(int argc, char **argv, Params *params)
   }
 }
 
+//------------------------------------------------------------------------------
+
 char *cpCells(char *src, unsigned int len)
 {
   char *dest = (char*) malloc((len)*sizeof(char));
@@ -246,6 +255,8 @@ char *cpCells(char *src, unsigned int len)
   memcpy(dest, src, (len)*sizeof(char));
   return dest;
 }
+
+//------------------------------------------------------------------------------
 
 int main(int argc, char **argv)
 {
