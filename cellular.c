@@ -177,7 +177,16 @@ void getArgs(int argc, char **argv, Params *params)
   {
     if(argv[i][0] == '-')
     {
-      // TODO: check, if next argument exists and is valid
+      // check if argument has one or more parameters
+      if(((i+1 >= argc) || (argv[i+1][0] == '-')) && argv[i][1] != 'h')
+      {
+        printf("ERROR: %d. argument '%s' needs a parameter.\n\n", i, argv[i]);
+        printHelp(params);
+        exit(EXIT_FAILURE);
+      }
+        
+      
+      // TODO: check validity of parameters
       // TODO: add choosing if wrap on sides
       switch(argv[i][1])
       {
@@ -185,6 +194,12 @@ void getArgs(int argc, char **argv, Params *params)
           printHelp(params);
           exit(EXIT_SUCCESS);
         case 'r':
+          if(argv[i+1] < 0 || atoi(argv[i+1]) > 255)
+          {
+            printf("ERROR: %d. argument. The rule must be between 0 - 255.\n\n", i);
+            printHelp(params);
+            exit(EXIT_FAILURE);
+          }
           params->RULE = atoi(argv[i+1]);
           i += 2;
           break;
