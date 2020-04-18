@@ -3,32 +3,33 @@
 //
 // Manuel Planton
 //
-//*                                       *                                     
-// *                                     ***                                    
-// **                                   **  *                                   
-// * *                                 ** ****                                 *
-// * **                               **  *   *                               **
-// * * *                             ** **** ***                             ** 
-// * * **                           **  *    *  *                           **  
-// * * * *                         ** ****  ******                         ** **
-// * * * **                       **  *   ***     *                       **  * 
-// * * * * *                     ** **** **  *   ***                     ** ****
-// * * * * **                   **  *    * **** **  *                   **  *   
-// * * * * * *                 ** ****  ** *    * ****                 ** ****  
-// * * * * * **               **  *   ***  **  ** *   *               **  *   **
-// * * * * * * *             ** **** **  *** ***  ** ***             ** **** ** 
-// * * * * * * **           **  *    * ***   *  ***  *  *           **  *    * *
-// * * * * * * * *         ** ****  ** *  * *****  *******         ** ****  ** *
-// * * * * * * * **       **  *   ***  **** *    ***      *       **  *   ***  *
-// * * * * * * * * *     ** **** **  ***    **  **  *    ***     ** **** **  ***
-// * * * * * * * * **   **  *    * ***  *  ** *** ****  **  *   **  *    * ***  
-// * * * * * * * * * * ** ****  ** *  ******  *   *   *** **** ** ****  ** *  * 
+//    *          *                                        *                   
+//   ***        ***                                      ***                  
+//  **  *      **  *                                    **  *                 
+// ** ****    ** ****                                  ** ****                
+// *  *   *  **  *   *                                **  *   *               
+// ***** ***** **** ***                              ** **** ***              
+// *     *     *    *  *                            **  *    *  *             
+// **   ***   ***  ******                          ** ****  ******            
+// * * **  * **  ***     *                        **  *   ***     *           
+// * * * *** * ***  *   ***                      ** **** **  *   ***          
+// * * * *   * *  **** **  *                    **  *    * **** **  *         
+// * * * ** ** ****    * ****                  ** ****  ** *    * ****        
+// * * * *  *  *   *  ** *   *                **  *   ***  **  ** *   *       
+// * * * ******** *****  ** ***              ** **** **  *** ***  ** ***      
+// * * * *        *    ***  *  *            **  *    * ***   *  ***  *  *     
+// * * * **      ***  **  *******          ** ****  ** *  * *****  *******    
+// * * * * *    **  *** ***      *        **  *   ***  **** *    ***      *   
+// * * * * **  ** ***   *  *    ***      ** **** **  ***    **  **  *    ***  
+// * * * * * ***  *  * ******  **  *    **  *    * ***  *  ** *** ****  **  * 
+// * * * * * *  ****** *     *** ****  ** ****  ** *  ******  *   *   *** ****
 
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 
 typedef struct params
 {
@@ -41,6 +42,21 @@ typedef struct params
   unsigned int arg_pos_end;
 } Params;
 
+
+void setRand(char *cells, int prob, Params *params)
+{
+  time_t t;
+  srand((unsigned) time(&t));
+  
+  int i;
+  for(i=0; i<params->NUM_CELLS; i++)
+  {
+    if(rand() < ((float)prob/100)*RAND_MAX)
+    {
+      cells[i] = params->ALIVE;
+    }
+  }
+}
 
 void init(char *cells, Params *params, char **argv)
 {
@@ -74,6 +90,10 @@ void init(char *cells, Params *params, char **argv)
           break;
         case 'l':
           cells[len] = params->ALIVE;
+          break;
+        case 'r':
+          setRand(cells, atoi(argv[i+1]), params);
+          i += 2;
           break;
       }
     }
@@ -140,8 +160,8 @@ void printHelp()
          "\t  cellular -s 3 12 42 ...\n" \
          "\tYou can choose the middle cell with 'm' and the last cell with 'l'.\n" \
          "\t  cellular -s 0 m l\n" \
-/*         "\tTo choose a random distribution, use 'r' and the probability in percent.\n" \*/
-/*         "\t  cellular -s r 50\n"*/
+         "\tTo choose a random distribution, use 'r' and the probability in percent.\n" \
+         "\t  cellular -s r 50\n"
          );
 }
 
@@ -158,6 +178,7 @@ void getArgs(int argc, char **argv, Params *params)
     if(argv[i][0] == '-')
     {
       // TODO: check, if next argument exists and is valid
+      // TODO: add choosing if wrap on sides
       switch(argv[i][1])
       {
         case 'r':
@@ -225,7 +246,7 @@ int main(int argc, char **argv)
   
   char cells[params.NUM_CELLS+1];
   
-  init(cells, &params, argv); // TODO: auch mit random
+  init(cells, &params, argv);
   
   char *old_cells = cpCells(cells, params.NUM_CELLS+1);
   
