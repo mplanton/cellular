@@ -27,16 +27,10 @@ void init(char *cells, Params *params)
   cells[len] = params->ALIVE;
 }
 
-void update(char *cells, Params *params)
+void update(char *cells, char *old_cells, Params *params)
 {
   unsigned int len = params->NUM_CELLS;
-  char *old_cells = (char*) malloc((len+1)*sizeof(char));
-  if(old_cells == NULL)
-  {
-    printf("ERROR: No memory for old_cells!\n");
-    exit(EXIT_FAILURE);
-  }
-  memcpy(old_cells, cells, (len+1)*sizeof(char));
+  memcpy(old_cells, cells, (len)*sizeof(char));
   
   int i;
   for(i=0; i<=len; i++)
@@ -72,7 +66,6 @@ void update(char *cells, Params *params)
     else
       cells[i] = params->DEAD;
   }
-  free(old_cells);
 }
 
 void printHelp()
@@ -114,6 +107,18 @@ void getArgs(int argc, char **argv, Params *params)
   }
 }
 
+char *cpCells(char *src, unsigned int len)
+{
+  char *dest = (char*) malloc((len)*sizeof(char));
+  if(dest == NULL)
+  {
+    printf("ERROR: No memory for cpCells!\n");
+    exit(EXIT_FAILURE);
+  }
+  memcpy(dest, src, (len)*sizeof(char));
+  return dest;
+}
+
 int main(int argc, char **argv)
 {
   Params params;
@@ -130,12 +135,17 @@ int main(int argc, char **argv)
   
   init(cells, &params); // TODO: auch mit random
   
+  char *old_cells = cpCells(cells, params.NUM_CELLS+1);
+  
   unsigned int cycle;
   for(cycle=0; cycle < params.CYCLES; cycle++)
   {
     puts(cells);
-    update(cells, &params);
+    update(cells, old_cells, &params);
   }
+  
+  if(old_cells != 0)
+    free(old_cells);
   
   return 0;
 }
